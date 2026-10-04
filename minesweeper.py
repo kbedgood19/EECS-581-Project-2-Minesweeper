@@ -1,13 +1,39 @@
 """
-Minesweeper Game Logic for EECS581
+Prologue Comments: added by Group 6 members for clarity
+
+Module Name: minesweeper.py
+Class Name: Cell -- module also acts as the BoardManager
+
+Description: Manages the 10x10 Minesweeper grid logic. Creates and stores 
+             Cell objects, handles user click events, manages random mine placement 
+             (ensuring the first click is always safe), calculates adjacent mines, 
+             and handles the recursive logic for revealing empty cells.
+
+Inputs: Row and column coordinates from user interactions, number of mines.
+Outputs: Updates to the grid state, updates to remaining mine counts, and 
+         returns game status strings ("Playing", "Victory", "Game Over: Loss").
+
+External sources: Inherited codebase from Group 26
+
+Authors: Original code by Group 26 . 
+         Comments added by Group 6: Marie Biernacki.
+
+Creation Date: 9/29/2026 (Inherited)
+
+Modified Date(s): 10/4/2026 (Group 6 Comments)
+
+
 """
+
 
 import random
 import game_state
 
+# --- Global Configurations --- 
 GRID_WIDTH = 10
 GRID_HEIGHT = 10
 
+# --- Gloabl State Variables ---
 NUM_MINES = 10
 mines_remaining = NUM_MINES
 first_click = True
@@ -17,6 +43,17 @@ grid = None
 class Cell:
     """
     Represents a single cell in the Minesweeper grid.
+    
+    Attributes:
+    x (int): The x-coordinate (column).
+    y (int): The y-coordinate (row).
+    is_mine (bool): True if the cell contains a mine, False otherwise.
+    is_revealed (bool): True if the user has uncovered this cell.
+    is_flagged (bool): True if the user has flagged this cell.
+    adjacent_mines (int): The number of mines in the 8 surrounding neighbor cells.
+
+    Authors: Group 26 (Original), Group 6 (Comments)
+
     """
 
     def __init__(self, x, y):
@@ -28,10 +65,20 @@ class Cell:
         self.adjacent_mines = 0
 
     def reveal(self):
+        """ Set's cell's state to revealed. """
         self.is_revealed = True
 
 
 def configure(num_mines):
+    """
+    Configures the game's initial mine count.
+    
+    Inputs: num_mines (int) - The total number of mines for the session.
+    Outputs: None. Updates global variables.
+
+    Authors: Group 26 (Original), Group 6 (Comments)
+    
+    """
     global NUM_MINES, mines_remaining
     NUM_MINES = num_mines
     mines_remaining = num_mines
@@ -41,28 +88,44 @@ def onLeftClick(x, y):
     """
     Handle the left click event on the Minesweeper grid.
 
-    Parameters:
-    x (int): The x-coordinate of the clicked cell.
-    y (int): The y-coordinate of the clicked cell.
+    Inputs: 
+        x (int): The x-coordinate (column) of the clicked cell.
+        y (int): The y-coordinate (row) of the clicked cell.
+    Outputs: 
+        Returns (str): The current game status after the click resolves.
+
+    Authors: Group 26 (Original), Group 6 (Comments)
+
     """
     global first_click
 
+    # Initialize the board on the very first click to ensure the player's 
+    # first move never hits a mine.
     if first_click:
         init_grid(x, y)
         first_click = False
-
+    
+    # Check bounds to prevent index out of range errors
     if 0 <= x < GRID_WIDTH and 0 <= y < GRID_HEIGHT:
         cell = grid[y][x]
 
+        # Ignore clicks on flagged cells; they must be unflagged to be revealed
         if cell.is_flagged:
-            return game_state.get_game_status()  # flagged cells can't be revealed
+            return game_state.get_game_status() 
 
+        # If the cell is safe and hidden, reveal it
         if not cell.is_revealed:
             cell.reveal()
+            
+            # Condition 1: Player clicked a mine -> Trigger Loss
             if cell.is_mine:
                 game_over()
+            
+            # Condition 2: Player clicked a cell with 0 adjacent mines -> Recursively open neighbors
             elif cell.adjacent_mines == 0:
                 reveal_adjacent_cells(x, y)
+            
+            # If the player didn't click a mine, check if this move won the game
             if not cell.is_mine:
                 game_state.check_victory(grid)
 
@@ -71,23 +134,35 @@ def onLeftClick(x, y):
 
 def onRightClick(x, y):
     """
-    Handle the right click event on the Minesweeper grid (toggles a flag).
+    Handles the right-click event to toggle a flag on a cell.
+    
+    Inputs: 
+        x (int): The x-coordinate (column) of the clicked cell.
+        y (int): The y-coordinate (row) of the clicked cell.
+    
+    Outputs: 
+        Returns (str): The current game status. Updates flag visual and mine count.
+    
+    Authors: Group 26 (Original), Group 6 (Comments)
 
-    Parameters:
-    x (int): The x-coordinate (column) of the clicked cell.
-    y (int): The y-coordinate (row) of the clicked cell.
     """
     global mines_remaining
 
+    # Prevent flagging before the grid is initialized by the first left click
     if grid is None:
         # Nothing has been placed yet; there's nothing to flag before the
         # first left click.
         return game_state.get_game_status()
 
+    # Ensure the click is within the board boundaries
     if 0 <= x < GRID_WIDTH and 0 <= y < GRID_HEIGHT:
         cell = grid[y][x]
+
+        # Only allow flagging on cells that are still hidden
         if not cell.is_revealed:
-            cell.is_flagged = not cell.is_flagged
+            cell.is_flagged = not cell.is_flagged # Toggle the boolean state
+            
+            # Increment or decrement the remaining mine counter based on the toggle
             if cell.is_flagged:
                 mines_remaining -= 1
             else:
@@ -98,15 +173,26 @@ def onRightClick(x, y):
 
 def init_grid(firstclick_x, firstclick_y):
     """
-    Initialize the Minesweeper grid with cells.
-
-    Parameters:
-    firstclick_x (int): The x-coordinate of the first clicked cell.
-    firstclick_y (int): The y-coordinate of the first clicked cell.
+    Initializes the 2D grid of Cell objects and populates it with mines.
+    
+    Inputs: 
+        firstclick_x (int): The x-coordinate of the first clicked cell.
+        firstclick_y (int): The y-coordinate of the first clicked cell.
+    
+    Outputs: None. Updates global grid state.
+    
+    Authors: Group 26 (Original), Group 6 (Comments)
+    
     """
     global grid
+
+    # Use list comprehension to build a 2D array of Cell objects (Y rows of X columns)
     grid = [[Cell(x, y) for x in range(GRID_WIDTH)] for y in range(GRID_HEIGHT)]
+    
+    # Place mines, passing the first click coordinates so they are protected
     place_mines(firstclick_x, firstclick_y)
+
+    # Pre-calculate the numbers for all safe cells based on new mine locations
     calculate_adjacent_mines()
 
 
@@ -114,19 +200,25 @@ def place_mines(firstclick_x, firstclick_y):
     """
     Randomly place mines in the grid.
 
-    Parameters:
-    firstclick_x (int): The x-coordinate of the first clicked cell.
-    firstclick_y (int): The y-coordinate of the first clicked cell.
+    Inputs: 
+        firstclick_x (int): The x-coordinate of the first clicked cell.
+        firstclick_y (int): The y-coordinate of the first clicked cell.
+    
+    Outputs: None. Updates the is_mine attribute of specific Cell objects.
+    
+    Authors: Group 26 (Original), Group 6 (Comments)
+    
     """
+    
     mines_placed = 0
+
+    # Continue picking random coordinates until the required number of mines are placed
     while mines_placed < NUM_MINES:
         x = random.randint(0, GRID_WIDTH - 1)
         y = random.randint(0, GRID_HEIGHT - 1)
 
-        # Original condition here was `not A or not B`, which is true for
-        # almost any cell and barely constrained placement. This requires
-        # both: the cell isn't already a mine, AND it isn't the first-clicked
-        # cell.
+        # Place a mine ONLY IF the random cell is not already a mine AND 
+        # is not the exact cell the user just clicked to start the game.
         if not grid[y][x].is_mine and (x, y) != (firstclick_x, firstclick_y):
             grid[y][x].is_mine = True
             mines_placed += 1
@@ -135,42 +227,81 @@ def place_mines(firstclick_x, firstclick_y):
 def calculate_adjacent_mines():
     """
     Calculate the number of adjacent mines for each cell in the grid.
+
+    Inputs: None. Relies on the global grid.
+    Outputs: None. Updates the adjacent_mines attribute of Cell objects.
+    
+    Authors: Group 26 (Original), Group 6 (Comments)
+
     """
+    # Iterate through every single cell on the board
     for y in range(GRID_HEIGHT):
         for x in range(GRID_WIDTH):
+
+            # We only need to calculate numbers for safe cells
             if not grid[y][x].is_mine:
                 count = 0
+
+                # Check the 3x3 block around the current cell (dx, dy from -1 to 1)
                 for dx in [-1, 0, 1]:
                     for dy in [-1, 0, 1]:
                         nx, ny = x + dx, y + dy
+
+                        # Ensure the neighboring coordinate is within the board limits
                         if 0 <= nx < GRID_WIDTH and 0 <= ny < GRID_HEIGHT:
                             if grid[ny][nx].is_mine:
                                 count += 1
+                
+                # Save the final count to the cell object
                 grid[y][x].adjacent_mines = count
 
 
 def reveal_adjacent_cells(x, y):
     """
-    Reveal adjacent cells recursively if they are not mines and have no
-    adjacent mines.
+    A recursive flood-fill algorithm that opens neighboring cells if the 
+    current cell has no adjacent mines (a "0" cell).
+    
+    Inputs: 
+        x (int): Column index of the cell to expand from.
+        y (int): Row index of the cell to expand from.
+    
+    Outputs: None. Modifies the is_revealed state of neighboring cells.
+    
+    Authors: Group 26 (Original), Group 6 (Comments)
     """
+
+    # Loop through all 8 neighboring directions
     for dx in [-1, 0, 1]:
         for dy in [-1, 0, 1]:
             nx, ny = x + dx, y + dy
+
+            # Check boundaries
             if 0 <= nx < GRID_WIDTH and 0 <= ny < GRID_HEIGHT:
                 neighbor_cell = grid[ny][nx]
+
+                # If the neighbor is hidden and safe, open it
                 if not neighbor_cell.is_revealed and not neighbor_cell.is_mine:
                     neighbor_cell.reveal()
+                    
+                    # If this neighbor also has 0 adjacent mines, recursively 
+                    # call the function to continue the flood-fill
                     if neighbor_cell.adjacent_mines == 0:
                         reveal_adjacent_cells(nx, ny)
 
 
 def game_over():
     """
-    Handle the game over scenario when a mine is clicked.
+    Triggers the end of the game logic upon a loss.
+    
+    Inputs: None.
+    Outputs: None. Updates global game_state and reveals all mines.
+    
+    Authors: Group 26 (Original), Group 6 (Comments)
     """
     game_state.set_game_over()
     print("Game Over! You clicked on a mine.")
+
+    # Iterate over the entire board and flip all mine cells to visible
     for row in grid:
         for cell in row:
             if cell.is_mine:
@@ -179,7 +310,13 @@ def game_over():
 
 def reset():
     """
-    Reset all module-level state for a new game (call before starting over).
+    Resets all variables to their initial state for a new game.
+    
+    Inputs: None.
+    Outputs: None. Clears out the grid and resets globals.
+    
+    Authors: Group 26 (Original), Group 6 (Comments)
+
     """
     global grid, first_click, mines_remaining
     grid = None
