@@ -16,27 +16,46 @@ Creation Date: 10/4/2026
 Basic Code Template/Outline: Marie Biernacki, Gemini
 """
 
-import random # MUST IMPORT RANDOM
+"""
+Description: Implements the Easy difficulty AI solver.
 
-def get_next_move(grid): # DO NOT CHANGE FUNCTION SIGNATURE OR RETURN TYPE
+The Easy solver should randomly choose a valid hidden cell.
+It should avoid cells that are already revealed or flagged.
+"""
+
+import random #MUST IMPORT RANDOM
+
+
+def get_next_move(grid):
     """
-    Finds a random safe move on the board.
-    
-    Inputs: grid (list of lists)
-    Outputs: tuple ("reveal", x, y)
-    -- x is column index, y is row index
+    chooses a random valid hidden cell.
+
+    expected output:
+        ("reveal", x, y)
+
+    returns none if no valid cells remain.
     """
-    # TODO (Kaitlyn): Implement the Easy AI logic here.
-    # 1. Loop through the grid and collect a list of all valid, hidden, unflagged cells.
-    # 2. Use random.choice() to select one of those cells.
-    # 3. Return the action and the cell's coordinates.
-    
-    # Placeholder return to prevent crashes during early testing:
-    # return ("reveal", 0, 0)
+
+    #todo:
+    #create a list to store possible cells the ai can choose from
+
+    #todo:
+    #loop through every cell in the grid
+
+    #todo:
+    #only include cells that are:
+    #     not revealed
+    #     not flagged
+
+    #todo:
+    #if there are no valid cells left, return none
+
+    #todo:
+    #use random.choice() to select one valid cell
+
+    #todo:
+    #return the selected cell in this format:
+    #
+    #     ("reveal", x, y)
+
     pass
-
-"""
-FIXME DELETE LATER:
-Feel free to add additional helper functions, etc as long as get_next_move(grid) returns the expected tuple
-
-"""
