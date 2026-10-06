@@ -225,8 +225,8 @@ class MinesweeperUI:
                 image=self.blank_image,
                 text=str(number) if number else "",  # Only print the number if > 0
                 compound="center",
-                relief="sunken",
-                bg="lightgray" 
+                relief="sunken", # 'sunken' indicates it has been pressed
+                bg="lightgray"
             )
 
         # State 3: User flagged tile

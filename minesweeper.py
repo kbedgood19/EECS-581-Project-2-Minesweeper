@@ -278,9 +278,6 @@ def reveal_adjacent_cells(x, y):
             # Check boundaries
             if 0 <= nx < GRID_WIDTH and 0 <= ny < GRID_HEIGHT:
                 neighbor_cell = grid[ny][nx]
-
-                # If the neighbor is hidden and safe, open it
-                if not neighbor_cell.is_revealed and not neighbor_cell.is_mine:
                 # (Lauren): Changes made because it did not check whether neighbor_cell was already flagged
                 # BUG: The recursive reveal can currently reach that flagged cell and reveal it internally because it doesn't check is_flagged
                 if (not neighbor_cell.is_revealed and not neighbor_cell.is_mine and not neighbor_cell.is_flagged):
