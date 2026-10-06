@@ -58,4 +58,16 @@ def get_next_move(grid):
     #
     #     ("reveal", x, y)
 
-    pass
+    valid_cells = []
+
+    for row in grid:
+        for cell in row:
+            if not cell.is_revealed and not cell.is_flagged:
+                valid_cells.append(cell)
+
+    if len(valid_cells) == 0:
+        return None
+
+    cell = random.choice(valid_cells)
+
+    return ("reveal", cell.x, cell.y)
