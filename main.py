@@ -22,6 +22,7 @@ def get_mine_count():
 
 
 def main():
+    minesweeper.reset() # (Lauren): Reset the game state before starting a new game.
     minesweeper.configure(get_mine_count())
     game_state.reset_game_status()
 

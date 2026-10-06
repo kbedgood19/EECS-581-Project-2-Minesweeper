@@ -5,6 +5,7 @@ Creation 9/12/2026
 """
 
 import tkinter as tk
+import sys # (Lauren): Added for synchronized UI on both Windows and macOS.
 
 BOARD_SIZE = 10
 TILE_SIZE = 40
@@ -93,10 +94,19 @@ class MinesweeperUI:
                     relief="raised",
                     command=lambda row=r, col=c: on_left_click(row, col)
                 )
-                tile.bind(
-                    "<Button-3>",
-                    lambda event, row=r, col=c: on_right_click(row, col)
-                )
+                # (Lauren): changed made to allow right click to work on macOS and Windows
+                if sys.platform == "darwin":  # macOS
+                    # Assigning the right-click event to Button-2 for macOS
+                    tile.bind(
+                        "<Button-2>",
+                        lambda event, row=r, col=c: on_right_click(row, col)
+                    )
+                else:  # Windows/Linux
+                    # Assigning the right-click event to Button-3 for Windows/Linux
+                    tile.bind(
+                        "<Button-3>",
+                        lambda event, row=r, col=c: on_right_click(row, col)
+                    )
                 tile.grid(row=r, column=c, padx=1, pady=1)
                 row_tiles.append(tile)
             self.tiles.append(row_tiles)
@@ -122,7 +132,7 @@ class MinesweeperUI:
                 text=str(number) if number else "",  # 0 renders blank, not "0"
                 compound="center",
                 relief="sunken",
-                bg="lightgray"
+                bg="lightgray" 
             )
 
         elif tile_type == "flag":
@@ -144,7 +154,8 @@ class MinesweeperUI:
                     self.set_tile(cell.y, cell.x, "flag")
                 elif not cell.is_revealed:
                     self.set_tile(cell.y, cell.x, "covered")
-                elif cell.is_mine:
+                # (Lauren): "and cell.is_revealed" added to fix where the UI prevents from showing a mine when the cell is flagged
+                elif cell.is_mine and cell.is_revealed:
                     self.set_tile(cell.y, cell.x, "mine")
                 else:
                     self.set_tile(cell.y, cell.x, "uncovered", cell.adjacent_mines)
