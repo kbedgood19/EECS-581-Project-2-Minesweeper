@@ -20,6 +20,7 @@ Modified Date(s): 10/4/2026 (Group 6 Comments + Updates)
 """
 
 import tkinter as tk
+import sys # (Lauren): Added for synchronized UI on both Windows and macOS.
 
 # --- GUI Constants ---
 BOARD_SIZE = 10
@@ -171,16 +172,19 @@ class MinesweeperUI:
                     relief="raised", # 'raised' gives it a 3D clickable look
                     command=lambda row=r, col=c: on_left_click(row, col) # Bind Left Click
                 )
-                tile.bind(
-                    # FIXME Lauren: Cross-platform bug fix here?
-                    # Windows uses <Button-3> for right-click. macOS/Linux often use <Button-2>.
-                    # Need to bind both to ensure the game is cross-platform compliant.
-                    
-                    "<Button-3>",
-                    lambda event, row=r, col=c: on_right_click(row, col)
-                )
-
-                # Place the button in the Tkinter grid geometry manager
+                # (Lauren): changed made to allow right click to work on macOS and Windows
+                if sys.platform == "darwin":  # macOS
+                    # Assigning the right-click event to Button-2 for macOS
+                    tile.bind(
+                        "<Button-2>",
+                        lambda event, row=r, col=c: on_right_click(row, col)
+                    )
+                else:  # Windows/Linux
+                    # Assigning the right-click event to Button-3 for Windows/Linux
+                    tile.bind(
+                        "<Button-3>",
+                        lambda event, row=r, col=c: on_right_click(row, col)
+                    )
                 tile.grid(row=r, column=c, padx=1, pady=1)
                 row_tiles.append(tile)
 
@@ -255,7 +259,8 @@ class MinesweeperUI:
                     self.set_tile(cell.y, cell.x, "flag")
                 elif not cell.is_revealed:
                     self.set_tile(cell.y, cell.x, "covered")
-                elif cell.is_mine:
+                # (Lauren): "and cell.is_revealed" added to fix where the UI prevents from showing a mine when the cell is flagged
+                elif cell.is_mine and cell.is_revealed:
                     self.set_tile(cell.y, cell.x, "mine")
                 else:
                     self.set_tile(cell.y, cell.x, "uncovered", cell.adjacent_mines)
