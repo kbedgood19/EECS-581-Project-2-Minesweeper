@@ -39,17 +39,30 @@ def get_next_move(grid):
     searches for a logical move before falling back to easy.
     """
 
-    #todo:
+    
     #loop through every revealed cell on the board
+    for y in range(len(grid)):
 
     #todo:
     #find all neighboring cells around the current revealed cell
+    for x in range(len(grid[y])):
+      cell = grid[y][x]
 
+  if not cell.is_revealed:
+                continue
+    
+    hidden_neighbors = []
+    flagged_neighbors = []
+  
     #todo:
     #separate those neighbors into:
     #     hidden neighbors
     #     flagged neighbors
+                            if neighbor.is_flagged:
+                            flagged_neighbors.append(neighbor)
 
+                        elif not neighbor.is_revealed:
+                            hidden_neighbors.append(neighbor)
 
     # ---------------------------------------------------------------
     # rule 1
