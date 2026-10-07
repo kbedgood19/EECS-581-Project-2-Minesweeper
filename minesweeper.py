@@ -280,7 +280,7 @@ def reveal_adjacent_cells(x, y):
                 neighbor_cell = grid[ny][nx]
                 # (Lauren): Changes made because it did not check whether neighbor_cell was already flagged
                 # BUG: The recursive reveal can currently reach that flagged cell and reveal it internally because it doesn't check is_flagged
-                if (not neighbor_cell.is_revealed and not neighbor_cell.is_mine and not neighbor_cell.is_flagged):
+                if(not neighbor_cell.is_revealed and not neighbor_cell.is_mine and not neighbor_cell.is_flagged):
                     neighbor_cell.reveal()
                     
                     # If this neighbor also has 0 adjacent mines, recursively 
