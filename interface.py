@@ -174,6 +174,11 @@ class MinesweeperUI:
                 )
                 # (Lauren): changed made to allow right click to work on macOS and Windows
                 if sys.platform == "darwin":  # macOS
+                    # Control + left click for right-click functionality on macOS laptop
+                    tile.bind(
+                        "<Control-Button-1>",
+                        lambda event, row=r, col=c: on_right_click(row, col)
+                    )
                     # Assigning the right-click event to Button-2 for macOS
                     tile.bind(
                         "<Button-2>",
@@ -223,7 +228,7 @@ class MinesweeperUI:
         elif tile_type == "uncovered":
             tile.config(
                 image=self.blank_image,
-                text=str(number) if number else "",  # Only print the number if > 0
+                text= str(number),  # (Lauren): edited to identify revealed tiles as 0
                 compound="center",
                 relief="sunken", # 'sunken' indicates it has been pressed
                 bg="lightgray"
@@ -255,14 +260,14 @@ class MinesweeperUI:
         # Loop through every backend cell and map its boolean attributes to a visual state
         for row in grid:
             for cell in row:
-                if cell.is_flagged:
-                    self.set_tile(cell.y, cell.x, "flag")
-                elif not cell.is_revealed:
-                    self.set_tile(cell.y, cell.x, "covered")
-                # (Lauren): "and cell.is_revealed" added to fix where the UI prevents from showing a mine when the cell is flagged
-                elif cell.is_mine and cell.is_revealed:
+                # (Lauren): ordered of if statements changed to fix where the UI prevents from showing a mine when the cell is flagged
+                if cell.is_mine and cell.is_revealed: # (Lauren): "and cell.is_revealed" added to fix where the UI prevents from showing a mine when the cell is flagged
                     self.set_tile(cell.y, cell.x, "mine")
-                else:
+                elif cell.is_flagged: # flagged but not revealed
+                    self.set_tile(cell.y, cell.x, "flag")
+                elif not cell.is_revealed: # not revealed 
+                    self.set_tile(cell.y, cell.x, "covered")
+                else: # revealed safe cell
                     self.set_tile(cell.y, cell.x, "uncovered", cell.adjacent_mines)
 
    
