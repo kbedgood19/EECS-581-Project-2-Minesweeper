@@ -14,9 +14,11 @@ External sources: Inherited codebase from Project 1.
 
 Authors: Original code by Group 26. 
          Comments added by Group 6: Marie Biernacki.
+         Timer/High Score feature by Group 6: Ximena Bustos.
 
 Creation Date: 9/29/2026 (Inherited)
 Modified Date(s): 10/4/2026 (Group 6 Comments)
+                  10/7/2026 (Group 6 Timer/High Score Feature)
 """
 
 
@@ -24,6 +26,7 @@ from tkinter import Tk, simpledialog
 
 import game_state
 import minesweeper
+import timer        # XIMENA
 from interface import MinesweeperUI
 
 # --- Global Configurations ---
@@ -96,6 +99,14 @@ def main():
         if game_state.get_game_status() != game_state.PLAYING:
             return
 
+        # ------------------ XIMENA ------------------
+        # Starts the timer when the player makes their first move
+        # minesweeper.first_click is True until the first left click
+        if minesweeper.first_click:
+            timer.start_timer()
+            ui.update_timer()
+        # --------------------------------------------
+
         # Process the click in the backend and get the updated game status
         status = minesweeper.onLeftClick(col, row)
         
@@ -127,9 +138,35 @@ def main():
         Checks the game status and prints a console message upon victory or loss.
         """
         if status == game_state.VICTORY:
+            # ------------------ XIMENA ------------------
+            # Stops the timer so the final game time is saved
+            # Gets the final game duration in seconds
+            timer.stop_timer()
+            game_time = timer.get_time()
+            # --------------------------------------------
             print("You win!")
+            # ------------------ XIMENA ------------------
+            # Checks if the completed time is a new high score
+            # Updates the high score displayed in the GUI
+            print(f"Game time: {game_time} seconds")        # Prints final game duration
+            if timer.save_high_score(game_time):
+                print("New High Score!")
+            else:
+                high_score = timer.get_high_score()
+                print(f"High score: {high_score} seconds")
+            ui.update_high_score()
+            # --------------------------------------------
         elif status == game_state.LOSS:
+            # ------------------ XIMENA ------------------
+            # Stops the timer when the player loses
+            # Gets the final game duration in seconds
+            timer.stop_timer()
+            game_time = timer.get_time()
+            # --------------------------------------------
             print("You lose!")
+            # ------------------ XIMENA ------------------
+            print(f"Game time: {game_time} seconds")        # Prints final game duration
+            # --------------------------------------------
 
     # 2. Instantiate the UI, passing in our local click handlers as callbacks
     ui = MinesweeperUI(handle_left_click, handle_right_click)
