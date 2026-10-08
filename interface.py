@@ -13,14 +13,17 @@ External sources: Inherited codebase from Project 1.
 
 Authors: Original code by Group 26 (Caleb Harmsen). 
          Comments and bug fixes added by Group 6: Marie Biernacki, Lauren Lee.
+         Timer/High Score Feature by Group 6: Ximena Bustos
 
 Creation Date: 9/29/2026 (Inherited)
 Modified Date(s): 10/4/2026 (Group 6 Comments + Updates)
+                  10/7/2026 (Group 6 Timer/High Score Feature)
 
 """
 
 import tkinter as tk
 import sys # (Lauren): Added for synchronized UI on both Windows and macOS.
+import timer        # XIMENA
 
 # --- GUI Constants ---
 BOARD_SIZE = 10
@@ -61,6 +64,31 @@ class MinesweeperUI:
             textvariable=self.mine_count_var,
             font=("TkDefaultFont", 11, "bold")
         ).pack(side="left")
+
+        # ------------------ XIMENA ------------------
+        # Displays the current game time
+        self.timer_var = tk.StringVar(value="Time: 0")
+        tk.Label(
+            self.status_bar,
+            textvariable=self.timer_var,
+            font=("TkDefaultFont", 11, "bold")
+        ).pack(side="left", padx=20)
+
+        # Displays the player's saved high score
+        high_score = timer.get_high_score()
+
+        if high_score is None:
+            high_score_text = "High Score: --"
+        else:
+            high_score_text = f"High Score: {high_score} seconds"
+
+        self.high_score_var = tk.StringVar(value=high_score_text)
+        tk.Label(
+            self.status_bar,
+            textvariable=self.high_score_var,
+            font=("TkDefaultFont", 11, "bold")
+        ).pack(side="right", padx=20)
+        # --------------------------------------------
 
         # Initialize and pack the dynamic label tracking flags placed (right side)
         self.score_var = tk.StringVar(value="Flags: 0/0")
@@ -107,7 +135,31 @@ class MinesweeperUI:
         """
         self.score_var.set(f"Flags: {flags_placed}/{total_mines}")
 
-    
+    # ------------------ XIMENA ------------------
+    # Updates the timer displayed in the status bar
+    def update_timer(self):
+        # Gets the number of seconds that have passed since the game started
+        elapsed_time = timer.get_time()
+
+        # Updates the timer text displayed in the GUI
+        self.timer_var.set(f"Time: {elapsed_time}")
+
+        # Continues updating the timer once every second while the game is running
+        if timer.start_time is not None and timer.end_time is None:
+            self.root.after(1000, self.update_timer)
+
+    # Updates the high score displayed in the status bar
+    def update_high_score(self):
+        # Reads the current high score from the high score file
+        high_score = timer.get_high_score()
+
+        # Displays "--" if no high score recorded yet
+        # Otherwise it displays the saved high score in seconds
+        if high_score is None:
+            self.high_score_var.set("High Score: --")
+        else:
+            self.high_score_var.set(f"High Score: {high_score} seconds")
+    # --------------------------------------------
     
     def _load_scaled_image(self, path, target_size):
         """
