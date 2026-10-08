@@ -1,6 +1,6 @@
 """
 Module Name: hard_solver.py
-Class Name: N/A
+Class Name: EECS581 Software Engineering II
 
 Description: Implements the Hard difficulty AI. Detects 1-2-1 patterns across 
              revealed cells to deduce safe and mined neighbors. Falls back to Medium 
@@ -9,7 +9,7 @@ Description: Implements the Hard difficulty AI. Detects 1-2-1 patterns across
 Inputs: The 2D grid of Cell objects.
 Outputs: Returns a tuple (action, x, y) where action is "reveal" or "flag".
 
-External sources: FIXME
+External sources: ChatGPT
 
 Authors: Group 6 - Jaydine Stiles
 Creation Date: 10/4/2026
@@ -344,8 +344,8 @@ def check_horizontal_121(grid, start_x, y):
         1 2 1
         ? ? ?
 
-    according to the project requirements, the hard ai should eventually
-    determine which cells should be flagged and which cell should be opened.
+    the two outer hidden cells are mines and the middle hidden cell is safe,
+    but only when no other unresolved neighbors can affect the 1-2-1 values.
 
     possible outputs:
 
@@ -354,48 +354,95 @@ def check_horizontal_121(grid, start_x, y):
         none
     """
 
-    # -----------------------------------------------------------------------
-    # todo jaydine - horizontal 1-2-1 implementation
-    # -----------------------------------------------------------------------
+    height = len(grid)
+    width = len(grid[0])
 
-    #todo:
-    #check whether there is a valid row directly above the 1-2-1 pattern
+    #store the positions of the three revealed number cells
+    number_positions = [
+        (start_x, y),
+        (start_x + 1, y),
+        (start_x + 2, y),
+    ]
 
-    #todo:
-    #if there is a row above it, inspect the three corresponding cells
+    #check the row above the pattern first, then the row below it
+    possible_rows = []
 
-    #todo:
-    #check whether there is a valid row directly below the 1-2-1 pattern
+    if y - 1 >= 0:
+        possible_rows.append(y - 1)
 
-    #todo:
-    #if there is a row below it, inspect the three corresponding cells
+    if y + 1 < height:
+        possible_rows.append(y + 1)
 
-    #todo:
-    #make sure a cell is still hidden before attempting to act on it
+    for target_y in possible_rows:
+        #these are the three covered cells directly beside the 1-2-1 pattern
+        candidate_positions = [
+            (start_x, target_y),
+            (start_x + 1, target_y),
+            (start_x + 2, target_y),
+        ]
+        candidate_set = set(candidate_positions)
 
-    #todo:
-    #do not attempt to reveal a cell that has already been revealed
+        #make sure no other hidden or flagged neighbors can change the pattern
+        pattern_is_clear = True
 
-    #todo:
-    #do not attempt to flag a cell that has already been flagged
+        for number_x, number_y in number_positions:
+            for dy in [-1, 0, 1]:
+                for dx in [-1, 0, 1]:
+                    neighbor_x = number_x + dx
+                    neighbor_y = number_y + dy
 
-    #todo:
-    #when the 1-2-1 pattern proves that an outer cell contains a mine,
-    #return:
-    #
-    #     ("flag", x, y)
+                    #skip coordinates that fall outside the board
+                    if not (0 <= neighbor_x < width and 0 <= neighbor_y < height):
+                        continue
 
-    #todo:
-    #when the 1-2-1 pattern proves that the inner cell is safe,
-    #return:
-    #
-    #     ("reveal", x, y)
+                    #skip the three cells that the 1-2-1 rule is analyzing
+                    if (neighbor_x, neighbor_y) in candidate_set:
+                        continue
 
-    #todo:
-    #only return one action at a time because get_next_move() represents
-    #one ai move
+                    neighbor = grid[neighbor_y][neighbor_x]
 
-    #if no useful action can currently be made from this pattern, return none
+                    #an unresolved cell outside the three candidates means the
+                    #1-2-1 pattern alone is not enough to prove a move
+                    if neighbor.is_flagged or not neighbor.is_revealed:
+                        pattern_is_clear = False
+                        break
+
+                if not pattern_is_clear:
+                    break
+
+            if not pattern_is_clear:
+                break
+
+        if not pattern_is_clear:
+            continue
+
+        left_cell = grid[target_y][start_x]
+        middle_cell = grid[target_y][start_x + 1]
+        right_cell = grid[target_y][start_x + 2]
+
+        #the outer cells must still be covered because the 1-2-1 rule says
+        #they are mines; a revealed outer cell means this side is not usable
+        if left_cell.is_revealed or right_cell.is_revealed:
+            continue
+
+        #the middle cell is known to be safe, so a flag on it makes this
+        #pattern unusable until that incorrect flag is removed
+        if middle_cell.is_flagged:
+            continue
+
+        #flag the left mine first if it has not already been flagged
+        if not left_cell.is_flagged:
+            return ("flag", left_cell.x, left_cell.y)
+
+        #once the left mine is flagged, flag the right mine
+        if not right_cell.is_flagged:
+            return ("flag", right_cell.x, right_cell.y)
+
+        #after both outer mines are flagged, the middle cell is safe to reveal
+        if not middle_cell.is_revealed:
+            return ("reveal", middle_cell.x, middle_cell.y)
+
+    #no horizontal 1-2-1 move is currently available
     return None
 
 
@@ -419,8 +466,8 @@ def check_vertical_121(grid, x, start_y):
         2 ?
         1 ?
 
-    this should eventually use the same logical process as
-    check_horizontal_121(), except rotated 90 degrees.
+    the two outer hidden cells are mines and the middle hidden cell is safe,
+    but only when no other unresolved neighbors can affect the 1-2-1 values.
 
     possible outputs:
 
@@ -429,46 +476,93 @@ def check_vertical_121(grid, x, start_y):
         none
     """
 
-    # -----------------------------------------------------------------------
-    # todo jaydine - vertical 1-2-1 implementation
-    # -----------------------------------------------------------------------
+    height = len(grid)
+    width = len(grid[0])
 
-    #todo:
-    #check whether there is a valid column directly to the left of the
-    #1-2-1 pattern
+    #store the positions of the three revealed number cells
+    number_positions = [
+        (x, start_y),
+        (x, start_y + 1),
+        (x, start_y + 2),
+    ]
 
-    #todo:
-    #if there is a column to the left, inspect the three corresponding cells
+    #check the column left of the pattern first, then the column to the right
+    possible_columns = []
 
-    #todo:
-    #check whether there is a valid column directly to the right of the
-    #1-2-1 pattern
+    if x - 1 >= 0:
+        possible_columns.append(x - 1)
 
-    #todo:
-    #if there is a column to the right, inspect the three corresponding cells
+    if x + 1 < width:
+        possible_columns.append(x + 1)
 
-    #todo:
-    #make sure cells are hidden before attempting to act on them
+    for target_x in possible_columns:
+        #these are the three covered cells directly beside the 1-2-1 pattern
+        candidate_positions = [
+            (target_x, start_y),
+            (target_x, start_y + 1),
+            (target_x, start_y + 2),
+        ]
+        candidate_set = set(candidate_positions)
 
-    #todo:
-    #do not reveal an already revealed cell
+        #make sure no other hidden or flagged neighbors can change the pattern
+        pattern_is_clear = True
 
-    #todo:
-    #do not flag an already flagged cell
+        for number_x, number_y in number_positions:
+            for dy in [-1, 0, 1]:
+                for dx in [-1, 0, 1]:
+                    neighbor_x = number_x + dx
+                    neighbor_y = number_y + dy
 
-    #todo:
-    #outer cells that are logically determined to contain mines should
-    #eventually return:
-    #
-    #     ("flag", x, y)
+                    #skip coordinates that fall outside the board
+                    if not (0 <= neighbor_x < width and 0 <= neighbor_y < height):
+                        continue
 
-    #todo:
-    #the corresponding safe cell should eventually return:
-    #
-    #     ("reveal", x, y)
+                    #skip the three cells that the 1-2-1 rule is analyzing
+                    if (neighbor_x, neighbor_y) in candidate_set:
+                        continue
 
-    #todo:
-    #only return one action at a time
+                    neighbor = grid[neighbor_y][neighbor_x]
 
-    #if this pattern currently provides no usable move, return none
+                    #an unresolved cell outside the three candidates means the
+                    #1-2-1 pattern alone is not enough to prove a move
+                    if neighbor.is_flagged or not neighbor.is_revealed:
+                        pattern_is_clear = False
+                        break
+
+                if not pattern_is_clear:
+                    break
+
+            if not pattern_is_clear:
+                break
+
+        if not pattern_is_clear:
+            continue
+
+        top_cell = grid[start_y][target_x]
+        middle_cell = grid[start_y + 1][target_x]
+        bottom_cell = grid[start_y + 2][target_x]
+
+        #the outer cells must still be covered because the 1-2-1 rule says
+        #they are mines; a revealed outer cell means this side is not usable
+        if top_cell.is_revealed or bottom_cell.is_revealed:
+            continue
+
+        #the middle cell is known to be safe, so a flag on it makes this
+        #pattern unusable until that incorrect flag is removed
+        if middle_cell.is_flagged:
+            continue
+
+        #flag the top mine first if it has not already been flagged
+        if not top_cell.is_flagged:
+            return ("flag", top_cell.x, top_cell.y)
+
+        #once the top mine is flagged, flag the bottom mine
+        if not bottom_cell.is_flagged:
+            return ("flag", bottom_cell.x, bottom_cell.y)
+
+        #after both outer mines are flagged, the middle cell is safe to reveal
+        if not middle_cell.is_revealed:
+            return ("reveal", middle_cell.x, middle_cell.y)
+
+    #no vertical 1-2-1 move is currently available
     return None
