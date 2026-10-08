@@ -27,6 +27,7 @@ from tkinter import Tk, simpledialog
 import game_state
 import minesweeper
 import timer        # XIMENA
+import setup_menu   # MARIE 
 from interface import MinesweeperUI
 
 # --- Global Configurations ---
@@ -73,9 +74,17 @@ def main():
     Authors: Original by Group 26. Comments by Group 6.
     """
 
+    #  ------------------ MARIE ------------------
+    config = setup_menu.get_game_config()
+    mine_count = config["mines"]
+    game_mode = config["mode"]
+    ai_difficulty = config["difficulty"]
+    # --------------------------------------------
+    
     # 1. Initialize the backend logic using the user's requested mine count
     minesweeper.reset() # (Lauren): Reset the game state before starting a new game.
-    minesweeper.configure(get_mine_count())
+    
+    minesweeper.configure(mine_count, game_mode, ai_difficulty) # MARIE - pass all three variables to setup the game
     game_state.reset_game_status()
 
     def refresh_status_bar():
@@ -117,6 +126,18 @@ def main():
         # Check if this click ended the game
         report_status(status)
 
+        # ------------------ MARIE ------------------
+        # Automatically Trigger the AI (only after left click, meaning user can place down as many flags wanted per turn)
+        # If the game is still going, let the AI take its turn after a 500ms delay
+        if status == game_state.PLAYING:
+            if minesweeper.GAME_MODE == "Interactive":
+                ui.root.after(500, handle_ai_turn)
+            elif minesweeper.GAME_MODE == "Auto":
+                # Kicks off the continuous Auto loop after the player's first click
+                ui.root.after(500, handle_ai_turn)
+        # --------------------------------------------
+
+
     def handle_right_click(row, col):
         """
         Callback triggered when a user right-clicks a tile in the GUI (flagging).
@@ -133,6 +154,27 @@ def main():
         refresh_status_bar()
         report_status(status)
 
+
+    #  ------------------ MARIE ------------------
+    def handle_ai_turn():
+        """
+        Executes the AI move automatically and updates the UI.
+        """
+        if game_state.get_game_status() != game_state.PLAYING:
+            return
+
+        # Execute the move and sync the frontend
+        status = minesweeper.execute_ai_move()
+        ui.render(minesweeper.grid)
+        refresh_status_bar()
+        report_status(status)
+
+        # If in Auto mode, create an infinite loop of AI turns until the game ends
+        if minesweeper.GAME_MODE == "Auto" and status == game_state.PLAYING:
+            ui.root.after(500, handle_ai_turn)
+    # --------------------------------------------
+
+    
     def report_status(status):
         """
         Checks the game status and prints a console message upon victory or loss.
@@ -173,6 +215,13 @@ def main():
 
     # 3. Perform an initial sync of the text in the status bar
     refresh_status_bar()
+
+    #  ------------------ MARIE ------------------
+    # added for auto mode, to start the game by itself
+    if game_mode == "Auto":
+        # Wait 1000ms (1 second) for the window to visually load, then go
+        ui.root.after(1000, handle_ai_turn)
+    # --------------------------------------------
 
     # 4. Start the Tkinter main event loop (this blocks until the window is closed)
     ui.run()
