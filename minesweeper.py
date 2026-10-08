@@ -32,7 +32,7 @@ import game_state
 # MARIE - added for AI integration
 import easy_solver
 # FIXME uncomment when med is finished: import medium_solver
-# FIXME uncomment when hard is finished: import hard_solver
+import hard_solver
 
 # --- Global Configurations --- 
 GRID_WIDTH = 10
