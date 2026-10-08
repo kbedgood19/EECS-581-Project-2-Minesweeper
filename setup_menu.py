@@ -9,9 +9,9 @@ Description: Handles the pre-game configuration UI. Prompts the user to select
 Inputs: User interactions via Tkinter UI.
 Outputs: Returns a dictionary containing the configuration settings.
 
-External sources: FIXME
+External sources: Gemini, https://www.geeksforgeeks.org/python/python-gui-tkinter/
 
-Authors: Group 6 - Sabelli Antebi Delmas
+Authors: Group 6 - Marie Biernacki
 Creation Date: 10/4/2026
 
 Basic Code Template/Outline: Marie Biernacki, Gemini
@@ -26,43 +26,87 @@ def get_game_config(): # DO NOT CHANGE FUNCTION SIGNATURE OR RETURN TYPE
     Inputs: None.
     Outputs: Returns (dict) - {"mines": int, "mode": str, "difficulty": str}
     """
-    # 1. Initialize the main Tkinter window (root) and set its title and geometry.
+    # Initialize the main Tkinter window (root) and set its title and geometry
+    root = tk.Tk()
+    root.title("Minesweeper - Game Setup")
+    root.geometry("350x450")
 
-    # 2. Create Tkinter Variables to store the selected options.
-    # You will need an IntVar for the mines (default 10), and StringVars for 
-    # mode (default "Solo") and difficulty (default "Easy").
+    # Tkinter Variables to store the selected options.
+    # set to default options (10 mines, Solo mode, Easy difficulty)
+    mineVar = tk.IntVar(value = 10)
+    modeVar = tk.StringVar(value = "Solo")
+    difficultyVar = tk.StringVar(value = "Easy")
 
-    # 3. Build the Mine Count Section.
-    # Create a tk.Label prompting for the number of mines (10-20).
-    # Create a tk.Spinbox bound to your IntVar, restricted from 10 to 20.
-    # Remember to pack() both widgets!
+    # Mine Count Prompt
+    # tk.Label prompting for the number of mines (10-20).
+    tk.Label(root, text = "Number of Mines (10-20):", font=("Arial", 12, "bold")).pack(pady=(20, 5))
+    # Spinbox window to select a number from a fixed range using up/down arrows
+    tk.Spinbox(root, from_=10, to=20, textvariable=mineVar, state="readonly").pack()
 
-    # 4. Build the Game Mode Section.
-    # Create a tk.Label for "Game Mode:".
-    # Create tk.Radiobuttons for "Solo", "Interactive", and "Auto". 
-    # Bind them all to your mode StringVar.
+   # --- Dynamic Disable/Enable ---
+    diff_radiobuttons = []  # List to store the difficulty button widgets
+
+    def on_mode_change():
+        """Disables AI difficulty buttons if Solo mode is selected."""
+        if modeVar.get() == "Solo":
+            for rb in diff_radiobuttons:
+                rb.config(state=tk.DISABLED)
+        else:
+            for rb in diff_radiobuttons:
+                rb.config(state=tk.NORMAL)
+
+    # Game Mode Prompt
+    tk.Label(root, text="Game Mode:", font=("Arial", 12, "bold")).pack(pady=(20, 5))
+    modes = ["Solo", "Interactive", "Auto"]
+    for mode in modes:
+        # Added command=on_mode_change to trigger the check whenever a new mode is clicked
+        tk.Radiobutton(root, text=mode, variable=modeVar, value=mode, command=on_mode_change).pack(anchor="w", padx=40)
     
-    # 5. Build the AI Difficulty Section.
-    # Create a tk.Label for "AI Difficulty:".
-    # Create tk.Radiobuttons for "Easy", "Medium", and "Hard"[cite: 1].
-    # Bind them all to your difficulty StringVar.
+    # AI Difficulty Prompt
+    tk.Label(root, text="AI Difficulty:", font=("Arial", 12, "bold")).pack(pady=(20, 5))
+    difficulties = ["Easy", "Medium", "Hard"]
+    for diff in difficulties:
+        rb = tk.Radiobutton(root, text=diff, variable=difficultyVar, value=diff)
+        rb.pack(anchor="w", padx=40)
+        diff_radiobuttons.append(rb) # Save the widget reference to list
 
-    # 6. Create an empty dictionary named 'config' to store the final choices.
+    # call at startup to ensure buttons start disabled (since "Solo" is the default)
+    on_mode_change()
+    
 
-    # 7. Create a submission callback function (e.g., 'def on_start():').
-    # Inside this function, use the .get() method on your Tkinter variables 
-    # to populate the 'config' dictionary with the keys "mines", "mode", and "difficulty".
-    # Finally, call root.destroy() inside this function to close the window.
+    # dictionary to store the final configuration
+    config = {}
 
-    # 8. Create a "Start Game" tk.Button and set its command to your callback function.
-    # Pack the button into the window.
+   # submission callback function
+    def on_start():
+        """Callback function for when the Start button is clicked.
+        
+        Inputs: None.
+        Outputs: Gets the number of mines, mode, and difficulty selections.
+        """
+        
+        config["mines"] = mineVar.get()
+        config["mode"] = modeVar.get()
 
-    # 9. Call root.mainloop() to block execution and keep the window open until 
-    # the user clicks Start.
+        # Optional: If Solo is selected, set difficulty to None instead of the greyed-out default
+        if config["mode"] == "Solo":
+            config["difficulty"] = "None"
+        else:
+            config["difficulty"] = difficultyVar.get()
 
-    # 10. Fallback Safety: Check if 'config' is empty (which happens if the user 
-    # clicks the 'X' to close the window instead of clicking Start). 
-    # If it is empty, set default values so the game doesn't crash.
+        # destroy the window to exit the mainloop and return to main.py
+        root.destroy()
 
-    # 11. Return the 'config' dictionary.
-    pass
+
+    # "Start Game" tk.Button and set command to on_start()
+    tk.Button(root, text="Start Game", command=on_start, font=("Arial", 12, "bold"), bg="lightgray").pack(pady=30)
+    
+    # root.mainloop() to block execution and keep the window open until the user clicks Start Game
+    root.mainloop()
+
+    # Fallback Safety: Check if 'config' is empty (which happens if the user  clicks the 'X' to close the window)
+    # Set default values so the game doesn't crash.
+    if not config:
+        config = {"mines": 10, "mode": "Solo", "difficulty": "Easy"}
+
+    return config

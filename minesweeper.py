@@ -29,12 +29,19 @@ Modified Date(s): 10/4/2026 (Group 6 Comments)
 import random
 import game_state
 
+# MARIE - added for AI integration
+import easy_solver
+# FIXME uncomment when med is finished: import medium_solver
+# FIXME uncomment when hard is finished: import hard_solver
+
 # --- Global Configurations --- 
 GRID_WIDTH = 10
 GRID_HEIGHT = 10
 
 # --- Gloabl State Variables ---
 NUM_MINES = 10
+GAME_MODE = "Solo"          # MARIE - Added for setup_menu config
+AI_DIFFICULTY = "Easy"      # MARIE - Added for setup_menu config
 mines_remaining = NUM_MINES
 first_click = True
 grid = None
@@ -68,20 +75,69 @@ class Cell:
         """ Set's cell's state to revealed. """
         self.is_revealed = True
 
-
-def configure(num_mines):
+#  ------------------ MARIE ------------------
+# modified to incorporate game mode and difficulty level
+def configure(num_mines, mode="Solo", difficulty="Easy"):
     """
     Configures the game's initial mine count.
     
-    Inputs: num_mines (int) - The total number of mines for the session.
+    Inputs:
+        num_mines (int) - The total number of mines for the session.
+        mode (str) - The selected game mode (Solo, Interactive, Auto).
+        difficulty (str) - The AI difficulty (Easy, Medium, Hard).
     Outputs: None. Updates global variables.
 
     Authors: Group 26 (Original), Group 6 (Comments)
+             Group 6 - Marie Biernacki
     
     """
-    global NUM_MINES, mines_remaining
+    
+    global NUM_MINES, mines_remaining, GAME_MODE, AI_DIFFICULTY
+    
     NUM_MINES = num_mines
     mines_remaining = num_mines
+
+    GAME_MODE = mode
+    AI_DIFFICULTY = difficulty
+
+#  ------------------ MARIE ------------------
+# added to connect the AI Solver levels to the game
+def execute_ai_move():
+    """
+    Requests the next move from the selected AI solver and executes it.
+    """
+    # Verify game is still active before asking the AI to move
+    if game_state.get_game_status() != game_state.PLAYING:
+        return game_state.get_game_status()
+
+    # If the board doesn't exist yet, pick a random starting coordinate 
+    # so we don't pass 'None' into the solver files and crash them.
+    if grid is None:
+        x = random.randint(0, GRID_WIDTH - 1)
+        y = random.randint(0, GRID_HEIGHT - 1)
+        return onLeftClick(x, y)
+    
+    
+    # Ask the correct AI for its move
+    move = None
+    if GAME_MODE in ["Interactive", "Auto"]:
+        if AI_DIFFICULTY == "Easy":
+            move = easy_solver.get_next_move(grid)
+        elif AI_DIFFICULTY == "Medium": # FIXME Medium & Hard not complete, these are currently broken
+            move = medium_solver.get_next_move(grid)
+        elif AI_DIFFICULTY == "Hard":
+            move = hard_solver.get_next_move(grid)
+
+    # Execute the move as if a human clicked the board
+    if move:
+        action, x, y = move
+        
+        if action == "reveal":
+            return onLeftClick(x, y)
+        elif action == "flag":
+            return onRightClick(x, y)
+    
+    return game_state.get_game_status()
 
 
 def onLeftClick(x, y):
