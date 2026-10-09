@@ -31,7 +31,7 @@ import game_state
 
 # MARIE - added for AI integration
 import easy_solver
-# FIXME uncomment when med is finished: import medium_solver
+import medium_solver
 import hard_solver
 
 # --- Global Configurations --- 
