@@ -127,13 +127,10 @@ def main():
         report_status(status)
 
         # ------------------ MARIE ------------------
-        # Automatically Trigger the AI (only after left click, meaning user can place down as many flags wanted per turn)
+        # Automatically Trigger the AI on Left Click
         # If the game is still going, let the AI take its turn after a 500ms delay
         if status == game_state.PLAYING:
             if minesweeper.GAME_MODE == "Interactive":
-                ui.root.after(500, handle_ai_turn)
-            elif minesweeper.GAME_MODE == "Auto":
-                # Kicks off the continuous Auto loop after the player's first click
                 ui.root.after(500, handle_ai_turn)
         # --------------------------------------------
 
@@ -154,6 +151,12 @@ def main():
         refresh_status_bar()
         report_status(status)
 
+        # ------------------ MARIE ------------------
+        # Automatically Trigger the AI on Right Click
+        if status == game_state.PLAYING and minesweeper.GAME_MODE == "Interactive":
+            ui.root.after(500, handle_ai_turn)
+        # --------------------------------------
+
 
     #  ------------------ MARIE ------------------
     def handle_ai_turn():
@@ -162,6 +165,11 @@ def main():
         """
         if game_state.get_game_status() != game_state.PLAYING:
             return
+
+        # Start timer for Auto mode before the first move
+        if minesweeper.first_click:
+            timer.start_timer()
+            ui.update_timer()
 
         # Execute the move and sync the frontend
         status = minesweeper.execute_ai_move()
