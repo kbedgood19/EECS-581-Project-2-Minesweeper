@@ -8,7 +8,7 @@ Description: Implements the Medium difficulty AI. Applies two deductive rules ba
 Inputs: The 2D grid of Cell objects.
 Outputs: Returns a tuple (action, x, y) where action is "reveal" or "flag".
 
-External sources: FIXME
+External sources: ChatGPT
 
 Authors: Group 6 - Greeshma Kunduri
 Creation Date: 10/4/2026
@@ -34,67 +34,86 @@ If neither rule works, fall back to Easy.
 import easy_solver #MUST IMPORT EASY SOLVER
 
 
+
 def get_next_move(grid):
     """
     searches for a logical move before falling back to easy.
     """
 
-    
-    #loop through every revealed cell on the board
+    # loop through every revealed cell on the board
     for y in range(len(grid)):
+        for x in range(len(grid[y])):
+            cell = grid[y][x]
 
-    #todo:
-    #find all neighboring cells around the current revealed cell
-    for x in range(len(grid[y])):
-      cell = grid[y][x]
-
-  if not cell.is_revealed:
+            if not cell.is_revealed:
                 continue
-    
-    hidden_neighbors = []
-    flagged_neighbors = []
-  
-    #todo:
-    #separate those neighbors into:
-    #     hidden neighbors
-    #     flagged neighbors
-                            if neighbor.is_flagged:
-                            flagged_neighbors.append(neighbor)
 
-                        elif not neighbor.is_revealed:
-                            hidden_neighbors.append(neighbor)
+            hidden_neighbors = []
+            flagged_neighbors = []
 
-    # ---------------------------------------------------------------
-    # rule 1
-    # ---------------------------------------------------------------
+            # find all neighboring cells
+            for dy in [-1, 0, 1]:
+                for dx in [-1, 0, 1]:
+                    if dx == 0 and dy == 0:
+                        continue
 
-    #todo:
-    #figure out how many mines are still needed around the cell
+                    nx = x + dx
+                    ny = y + dy
 
-    #todo:
-    #if the number of hidden neighbors equals the number of mines
-    #still needed, return one of those cells as:
-    #
-    #     ("flag", x, y)
+                    if not (0 <= ny < len(grid)):
+                        continue
+                    if not (0 <= nx < len(grid[ny])):
+                        continue
 
+                    neighbor = grid[ny][nx]
 
-    # ---------------------------------------------------------------
-    # rule 2
-    # ---------------------------------------------------------------
+                    if neighbor.is_flagged:
+                        flagged_neighbors.append(neighbor)
+                    elif not neighbor.is_revealed:
+                        hidden_neighbors.append(neighbor)
 
-    #todo:
-    #if the number of flagged neighbors already equals the number
-    #shown on the revealed cell, the remaining hidden neighbors are safe
+            # Rule 1: flag a hidden neighbor if it must be a mine
+            mines_needed = cell.adjacent_mines - len(flagged_neighbors)
 
-    #todo:
-    #return one safe hidden cell as:
-    #
-    #     ("reveal", x, y)
+            if hidden_neighbors and len(hidden_neighbors) == mines_needed:
+                neighbor = hidden_neighbors[0]
+                return ("flag", neighbor.x, neighbor.y)
 
+    # Rule 2: reveal a hidden neighbor if all mines are flagged
+    for y in range(len(grid)):
+        for x in range(len(grid[y])):
+            cell = grid[y][x]
 
-    #todo:
-    #if neither medium rule works, fall back to easy
-    #
-    #     return easy_solver.get_next_move(grid)
+            if not cell.is_revealed:
+                continue
 
-    pass
+            hidden_neighbors = []
+            flagged_count = 0
+
+            # find neighboring cells
+            for dy in [-1, 0, 1]:
+                for dx in [-1, 0, 1]:
+                    if dx == 0 and dy == 0:
+                        continue
+
+                    nx = x + dx
+                    ny = y + dy
+
+                    if not (0 <= ny < len(grid)):
+                        continue
+                    if not (0 <= nx < len(grid[ny])):
+                        continue
+
+                    neighbor = grid[ny][nx]
+
+                    if neighbor.is_flagged:
+                        flagged_count += 1
+                    elif not neighbor.is_revealed:
+                        hidden_neighbors.append(neighbor)
+
+            if flagged_count == cell.adjacent_mines and hidden_neighbors:
+                neighbor = hidden_neighbors[0]
+                return ("reveal", neighbor.x, neighbor.y)
+
+    # if neither medium rule works, fall back to easy
+    return easy_solver.get_next_move(grid)
