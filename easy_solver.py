@@ -8,7 +8,7 @@ Description: Implements the Easy difficulty AI for Minesweeper. The AI uncovers
 Inputs: The 2D grid of Cell objects.
 Outputs: Returns a tuple (action, x, y) where action is "reveal" and x, y are coordinates.
 
-External sources: FIXME
+External sources: ChatGPT used to help test Easy solver logic
 
 Authors: Group 6 - Kaitlyn Bedgood
 Creation Date: 10/4/2026
@@ -28,46 +28,25 @@ import random #MUST IMPORT RANDOM
 
 def get_next_move(grid):
     """
-    chooses a random valid hidden cell.
-
+    chooses a random valid hidden cell that is not flagged
+    input: grid of cell objects
     expected output:
         ("reveal", x, y)
 
     returns none if no valid cells remain.
     """
 
-    #todo:
-    #create a list to store possible cells the ai can choose from
+    valid_cells = [] #list of valid cells the AI can choose from
 
-    #todo:
-    #loop through every cell in the grid
+    #two dimensional list, goes through every row and cell on board
+    for row in grid: #loop through every row
+        for cell in row: #loop thorugh each cell in current row
+            if not cell.is_revealed and not cell.is_flagged: #check that cell is not revealed or flagged
+                valid_cells.append(cell) #add cell to valid_cells as a possible move
 
-    #todo:
-    #only include cells that are:
-    #     not revealed
-    #     not flagged
+    if len(valid_cells) == 0: #check if valid_cells is empty
+        return None #returns none if there are no cells to choose from
 
-    #todo:
-    #if there are no valid cells left, return none
+    cell = random.choice(valid_cells) #randomly chooses one cell from available cells
 
-    #todo:
-    #use random.choice() to select one valid cell
-
-    #todo:
-    #return the selected cell in this format:
-    #
-    #     ("reveal", x, y)
-
-    valid_cells = []
-
-    for row in grid:
-        for cell in row:
-            if not cell.is_revealed and not cell.is_flagged:
-                valid_cells.append(cell)
-
-    if len(valid_cells) == 0:
-        return None
-
-    cell = random.choice(valid_cells)
-
-    return ("reveal", cell.x, cell.y)
+    return ("reveal", cell.x, cell.y) #return the reveal action and the column and row of chosen cell
