@@ -91,8 +91,8 @@ def main():
         """
         Calculates and pushes the current mine and flag counts to the UI.
         """
-        # Update the left side of the status bar (mines remaining)
-        ui.update_mine_count(minesweeper.mines_remaining)
+        # Update the left side of the status bar (static total mine count)
+        ui.update_mine_count(minesweeper.NUM_MINES)
 
         # Calculate flags placed by subtracting remaining mines from total mines
         flags_placed = minesweeper.NUM_MINES - minesweeper.mines_remaining
@@ -107,6 +107,12 @@ def main():
         # Ignore clicks if the game is already won or lost
         if game_state.get_game_status() != game_state.PLAYING:
             return
+
+        # ------------------ MARIE ------------------
+        # Ignore flags on empty board or already revealed cells
+        if minesweeper.grid is not None and minesweeper.grid[row][col].is_revealed:
+            return
+        # --------------------------------------------
 
         # ------------------ XIMENA ------------------
         # Starts the timer when the player makes their first move
@@ -142,6 +148,12 @@ def main():
         # Ignore clicks if the game is already won or lost
         if game_state.get_game_status() != game_state.PLAYING:
             return
+
+        # ------------------ MARIE ------------------
+        # Ignore flags on empty board or already revealed cells
+        if minesweeper.grid is None or minesweeper.grid[row][col].is_revealed:
+            return
+        # -------------------------------------------
 
         # Process the flag toggle in the backend
         status = minesweeper.onRightClick(col, row)

@@ -216,15 +216,18 @@ def onRightClick(x, y):
 
         # Only allow flagging on cells that are still hidden
         if not cell.is_revealed:
-            cell.is_flagged = not cell.is_flagged # Toggle the boolean state
+            # cell.is_flagged = not cell.is_flagged # Toggle the boolean state
             
             #  ------------------ MARIE ------------------
             # If the cell doesn't have a flag yet, but we are out of flags, ignore the click
             # This block ensures that you do not have access to infinite flags
             if not cell.is_flagged and mines_remaining <= 0:
                 return game_state.get_game_status()
-            # --------------------------------------------
 
+            # Toggle the boolean state
+            cell.is_flagged = not cell.is_flagged
+
+            # --------------------------------------------
 
             # Increment or decrement the remaining mine counter based on the toggle
             if cell.is_flagged:
