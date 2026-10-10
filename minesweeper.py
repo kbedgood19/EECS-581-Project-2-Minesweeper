@@ -123,7 +123,7 @@ def execute_ai_move():
     if GAME_MODE in ["Interactive", "Auto"]:
         if AI_DIFFICULTY == "Easy":
             move = easy_solver.get_next_move(grid)
-        elif AI_DIFFICULTY == "Medium": # FIXME Medium & Hard not complete, these are currently broken
+        elif AI_DIFFICULTY == "Medium":
             move = medium_solver.get_next_move(grid)
         elif AI_DIFFICULTY == "Hard":
             move = hard_solver.get_next_move(grid)
