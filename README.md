@@ -1,12 +1,18 @@
-# EECS-581-Project-1-Minesweeper
-Group 26 first project for class EECS 581 Fall 2026
+# EECS-581-Project-2-Minesweeper
+Group 6 project for EECS 581, Fall 2026.
+Built on Group 26's original Minesweeper project.
 
+Download and extract the project, then run main.py using Python 3.
 
-Just download the entire contents and run main.py
+Choose 10–20 mines and a game mode:
+- Solo: Play by yourself.
+- Interactive: Play alongside the AI.
+- Auto: Watch the AI play.
 
-It will prompt you for how many mines you want between 10 to 20.
+AI difficulties: Easy (random moves), Medium (basic logic), and Hard (1-2-1 patterns).
 
-Left click reveals the mine
-Right click Toggles the flag
+Left-click reveals a cell.
+Right-click places or removes a flag.
+Reveal all safe cells to win.
 
-Have fun!
+Includes a timer and saved best completion time.
