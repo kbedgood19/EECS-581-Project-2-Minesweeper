@@ -1,6 +1,6 @@
 """
 Module Name: hard_solver.py
-Class Name: EECS581 Software Engineering II
+Class Name: N/A
 
 Description: Implements the Hard difficulty AI. Detects 1-2-1 patterns across 
              revealed cells to deduce safe and mined neighbors. Falls back to Medium 
@@ -14,7 +14,7 @@ External sources: ChatGPT
 Authors: Group 6 - Jaydine Stiles
 Creation Date: 10/4/2026
 
-Basic Code Template/Outline: Marie Biernacki, Gemini
+Basic Code Template/Outline: Marie Biernacki (base) with Gemini, Jaydine Stiles (more in depth) with ChatGPT
 """
 
 import random
@@ -58,55 +58,7 @@ import medium_solver
 # easy or medium solver logic.
 # ---------------------------------------------------------------------------
 
-
-# ---------------------------------------------------------------------------
-# temporary hard ai testing values
-# ---------------------------------------------------------------------------
-
-# TEMPORARY TESTING VALUE:
-#
-# this controls how often the hard ai attempts to use its special 1-2-1 rule.
-#
-# 1.00 = always try the hard rule
-# 0.75 = try the hard rule about 75% of the time
-# 0.50 = try the hard rule about 50% of the time
-# 0.00 = completely skip the hard rule
-#
-# IMPORTANT:
-#
-# this value is mainly here while we are building and testing the different
-# solver files.
-#
-# the random move behavior will most likely be handled inside easy_solver.py.
-# once easy_solver.py has its random move logic working correctly, this value
-# probably does NOT need to control the difficulty anymore.
-#
-# for the final hard solver, this should either:
-#
-#     1. remain at 1.00
-#
-# OR
-#
-#     2. be deleted completely along with the random.random() condition
-#        inside get_next_move()
-#
-# lowering this value right now is simply an easy way to intentionally make
-# the bot weaker while testing.
 HARD_RULE_CHANCE = 1.00
-
-
-# TEMPORARY TESTING VALUES:
-#
-# these switches allow us to turn horizontal or vertical 1-2-1 detection
-# on and off while debugging.
-#
-# true = check this direction
-# false = ignore this direction
-#
-# for the finished hard solver, both should normally remain true.
-#
-# these variables could also eventually be deleted and both directions
-# could simply always be checked.
 CHECK_HORIZONTAL_121 = True
 CHECK_VERTICAL_121 = True
 
@@ -159,33 +111,7 @@ def get_next_move(grid):
         if move is not None:
             return move
 
-    # -----------------------------------------------------------------------
-    # medium solver handoff
-    # -----------------------------------------------------------------------
-    #
-    # IMPORTANT FOR THE MEDIUM SOLVER:
-    #
-    # the two normal minesweeper logic rules should be implemented inside
-    # medium_solver.py.
-    #
-    # RULE 1:
-    #
-    # if the number of hidden neighbors around a revealed cell equals the
-    # number shown by that cell, those hidden neighbors should be flagged.
-    #
-    # RULE 2:
-    #
-    # if the number of flagged neighbors around a revealed cell equals the
-    # number shown by that cell, the remaining hidden neighbors are safe and
-    # should be revealed.
-    #
-    # hard_solver.py should NOT permanently contain copies of those rules.
-    #
-    # once medium_solver.py is completed, hard_solver.py simply sends control
-    # to it whenever no usable 1-2-1 pattern is found.
-    #
-    # medium_solver.py should then call easy_solver.py if neither of its
-    # logical rules can make a move.
+   
     return medium_solver.get_next_move(grid)
 
 

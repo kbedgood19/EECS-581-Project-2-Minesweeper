@@ -13,7 +13,7 @@ External sources: ChatGPT used to help test Easy solver logic
 Authors: Group 6 - Kaitlyn Bedgood
 Creation Date: 10/4/2026
 
-Basic Code Template/Outline: Marie Biernacki, Gemini
+Basic Code Template/Outline: Marie Biernacki (base) with Gemini, Jaydine Stiles (more in depth) with ChatGPT
 """
 
 """
